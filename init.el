@@ -461,16 +461,11 @@
 (use-package org
   :ensure t
   :config
-  (setq org-agenda-files '("~/Documents/GitHub/oneplus7git/MasterOrgDirectory/2024Budget/"))
+  (setq org-agenda-files '(""))
   ;; Your other org-mode configurations would go here
   )
 
-(setq org2blog/wp-blog-alist
-      '(("myblog"
-         :url "https://theena.net/wp-admin/"
-		 
-         :username "theenak"
-		 :password iBZCI&V9VgSZc$5q)))
+
 
 ;;
 (desktop-save-mode 1) ;; this ensures that previous buffer is open when Emacs loads
@@ -518,7 +513,7 @@
   :init
   (setq org-roam-v2-ack t)
   :custom
-  (org-roam-directory "~/Documents/GitHub/oneplus7git/MasterOrgDirectory/2024Budget/OrgRoam/")
+  (org-roam-directory "")
   (org-roam-completion-everywhere t)
   (org-roam-capture-templates
    '(("d" "default" plain
