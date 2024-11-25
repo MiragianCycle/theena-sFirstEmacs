@@ -129,6 +129,7 @@
 ;; licensing criteria, MELPA offers a broader range of packages and is considered the
 ;; standard for Emacs users. You can also add more package archives later as needed.
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 
 
 ;; Define a global customizable variable `ek-use-nerd-fonts' to control the use of 
@@ -172,6 +173,7 @@
   (delete-selection-mode 1)                       ;; Enable replacing selected text with typed text.
   (display-line-numbers-type 'relative)           ;; Use relative line numbering in programming modes.
   (global-auto-revert-non-file-buffers t)         ;; Automatically refresh non-file buffers.
+  (global-auto-revert-mode 1)                     ;; Makes emac watch the files for all open buffers for changes in disk outside emacs, refreshing them automatically if they don't have unsaved changes
   (history-length 25)                             ;; Set the length of the command history.
   (inhibit-startup-message t)                     ;; Disable the startup message when Emacs launches.
   (initial-scratch-message "")                    ;; Clear the initial message in the *scratch* buffer.
@@ -201,15 +203,15 @@
 	"Function for `switch-to-prev-buffer-skip'."
 	(string-match "\\*[^*]+\\*" (buffer-name buffer)))
   (setq switch-to-prev-buffer-skip 'skip-these-buffers)
-
+  
 
   ;; Configure font settings based on the operating system.
   ;; Ok, this kickstart is meant to be used on the terminal, not on GUI.
   ;; But without this, I fear you could start Graphical Emacs and be sad :(
-  (set-face-attribute 'default nil :family "JetBrainsMono Nerd Font"  :height 100)
+  (set-face-attribute 'default nil :family "JetBrainsMono Nerd Font"  :height 150)
   (when (eq system-type 'darwin)       ;; Check if the system is macOS.
     (setq mac-command-modifier 'meta)  ;; Set the Command key to act as the Meta key.
-    (set-face-attribute 'default nil :family "JetBrainsMono Nerd Font" :height 130))
+    (set-face-attribute 'default nil :family "JetBrainsMono Nerd Font" :height 150))
 
   ;; Save manual customizations to a separate file instead of cluttering `init.el'.
   ;; You can M-x customize, M-x customize-group, or M-x customize-themes, etc.
@@ -449,7 +451,7 @@
    '((error "!»" compilation-error) (warning "»" compilation-warning)
 	 (note "»" compilation-info))))
 
-
+;; THEENA CHANGES START HERE;
 ;;; ORG-MODE
 ;; Org-mode is a powerful system for organizing and managing your notes, 
 ;; tasks, and documents in plain text. It offers features like task management, 
@@ -457,8 +459,133 @@
 ;; productivity. The configuration below simply defers loading Org-mode until 
 ;; it's explicitly needed, which can help speed up Emacs startup time.
 (use-package org
-  :ensure nil     ;; This is built-in, no need to fetch it.
-  :defer t)       ;; Defer loading Org-mode until it's needed.
+  :ensure t
+  :config
+  (setq org-agenda-files '("~/Documents/GitHub/oneplus7git/MasterOrgDirectory/2024Budget/"))
+  ;; Your other org-mode configurations would go here
+  )
+
+(setq org2blog/wp-blog-alist
+      '(("myblog"
+         :url "https://theena.net/wp-admin/"
+		 
+         :username "theenak"
+		 :password iBZCI&V9VgSZc$5q)))
+
+;;
+(desktop-save-mode 1) ;; this ensures that previous buffer is open when Emacs loads
+(setq desktop-restore-eager 5) ;; five buffers back in history
+(setq desktop-auto-save-timeout 30)
+
+
+;; This ensures that all buffers render the text in visual line mode by default. Greyed out because it wasn't working
+
+;; (add-hook 'find-file-hook
+;; 		  'turn-on-visual-line-mode)
+;; (add-hook 'vanilla-mode-hook
+;; 		  'turn-on-visual-line-mode);; this is for plain text, the above for all other types
+
+;; These are often used keybindings. 
+(global-set-key(kbd "C-x C-l")'ellama-chat)
+(global-set-key(kbd "C-x C-v")'visual-line-mode)
+(global-set-key(kbd "C-x C-d")'darkroom-mode)
+(global-set-key(kbd "C-x C-w")'window-swap-states)
+(global-set-key(kbd "C-x C-o")'olivetti-mode)
+
+(defun my-scratch-mode-hook ()
+  "Create a new scratch buffer when entering scratch mode."
+  (when (not (get-buffer "*scratch*"))
+    (let ((buf (find-file-noselect "*scratch*")))
+      (with-current-buffer buf
+        ; Customize the behavior of the new scratch buffer here, e.g.,
+        ; set the major mode or customize other options.
+        ; (setq local-variable '(fill-column . 80))
+      )
+      ; Return non-nil to indicate that the hook function has done something.
+      t)))
+
+(add-hook 'scratch-mode-hook 'my-scratch-mode-hook)
+
+;;EBOOK MANAGEMENT THROUGH CALIBRE AND CALIBRE DB
+
+;;(require 'calibredb)
+;;(setq calibredb-root-dir "~/Downloads/BooksEpub/calibredb")
+;;(setq calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
+;;(setq calibredb-library-alist '(("~/Downloads/BooksEpub/calibredb")
+
+(use-package org-roam
+  :ensure t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/Documents/GitHub/oneplus7git/MasterOrgDirectory/2024Budget/OrgRoam/")
+  (org-roam-completion-everywhere t)
+  (org-roam-capture-templates
+   '(("d" "default" plain
+      "%?"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date:%U\n")
+      :unnarrowed t)
+
+	 ("p" "Client Project" plain
+	  "* Introduction\n\n- Stakeholders: \n\n- Contacts: \n\n* Notes: %?\n"
+	  :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date:%U\n")
+	  :unnarrowed t)
+
+	 
+	 ("P" "Personal Project" plain
+	  "* Introduction\n\n- Goal: \n\n- Motivation: \n\n* Notes: %?\n"
+	  :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date:%U\n")
+	  :unnarrowed t) 
+	 
+	 ("j" "Journal" plain
+	  "* Thought\n\n- Emotional Response (out of 5): \n\n- Topic: \n\n* Notes: %?\n"
+	  :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date:%U\n")
+	  :unnarrowed t) 
+	 
+
+	 ("f" "Fiction Reading" plain
+	  "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nFiction: ${fiction}\nYear: %^{Year}\n\n* Summary\n\n%?"
+	  :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date:%U\n")
+	  :unnarrowed t)
+  
+	 ("n" "Non-Fiction Reading" plain
+	  "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nNonfiction: %^{NonFiction}\nYear: %^{Year}\n\n* Summary\n\n%?"
+	  :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date:%U\n")
+	  :unnarrowed t)))
+
+
+  
+
+	 
+	 
+
+  
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+		 ("C-c n f" . org-roam-node-find)
+		 ("C-c n i" . org-roam-node-insert))
+  :config
+  (org-roam-setup))
+  
+
+;; (pdf-tools-install)
+;;  (when (memq window-system '(mac ns))
+;;       ;; solves issue of not buildling in macOS
+;;       (setenv "PKG_CONFIG_PATH" "/usr/local/lib/pkgconfig:/usr/local/Cellar/libffi/3.2.1/lib/pkgconfig"))
+
+
+
+(require 'org-download)
+
+;; Drag-and-drop to `dired`
+(add-hook 'dired-mode-hook 'org-download-enable)
+
+
+
+
+
+
+;; HERE ENDS THEENA 
+
 
 
 ;;; WHICH-KEY
